@@ -1,11 +1,16 @@
-# Splitly web
+# เว็บ Splitly
 
-Independent Bun 1.4.3 / Next.js repository. Run `bun install --frozen-lockfile`,
-then `bun run check`, `bun run test`, and `bun run build` from this directory.
+เวอร์ชัน `0.1.0` รองรับ Vercel Preview โดยตั้ง `API_PROXY_TARGET` เป็น origin ของ API Preview; เว็บจะเรียก `/api/*` จาก origin ตัวเอง ดูตัวแปรและลำดับ deploy ใน `../../docs/PREVIEW.md` ที่โฟลเดอร์แม่
 
-For native development, copy `.env.local.example` to `.env.local`, enter the
-dev Supabase URL and publishable key, then run `bun run dev`. Open
-`http://localhost:3003`. The app has no login UI yet; the Supabase variables
-prepare the public configuration for later implementation.
+รีโพซิทอรี Next.js ที่ติดตั้งได้อิสระด้วย Bun 1.4.3 จากโฟลเดอร์นี้ให้รัน `bun install --frozen-lockfile`, `bun run check`, `bun run test` และ `bun run build`
 
-Only publishable Supabase keys belong in `NEXT_PUBLIC_*` variables.
+หากรันโดยไม่ใช้ Compose ให้คัดลอก `.env.local.example` เป็น `.env.local` ใส่ Supabase dev URL กับ publishable key แล้วรัน `bun run dev` เปิด <http://localhost:3003>
+หน้าเว็บสร้างห้องด้วยชื่อผู้ร่วมแบ่งอย่างน้อย 2 คน เพิ่มรายการจ่าย และแสดงยอดโอนสุทธิ ลิงก์ห้องอยู่หลัง `#` ใน URL เพื่อให้คัดลอกแชร์ได้โดยไม่ส่ง token ไปกับคำขอหน้าเว็บ ผู้เปิดลิงก์เลือกชื่อหรือเพิ่มชื่อแล้วกดถัดไปเพื่อกรอก PIN ก่อนเห็นหน้าห้อง ปุ่มเพิ่มและแก้ไขรายการเปิด dialog ฟอร์มเดียวกัน ส่วนสรุปแสดงทุกคนที่ต้องจ่ายและต้องรับ หน้าห้องดึงข้อมูลล่าสุดทุก 5 วินาทีเมื่อแท็บเปิดอยู่
+ลิงก์ที่ขึ้นต้นด้วย `http://localhost:3003` เปิดได้เฉพาะเครื่องที่รันเว็บอยู่ เมื่อจะให้เพื่อนเปิดจากเครื่องอื่นต้องนำเว็บและ API ขึ้นโฮสต์ที่เข้าถึงได้ก่อน
+เว็บยังไม่มีหน้าเข้าสู่ระบบบัญชี ผู้ที่ได้ลิงก์ก่อนอาจจับจองชื่อที่ยังไม่มี PIN ได้ จึงควรแชร์เฉพาะกับกลุ่มที่ไว้ใจ
+ก่อนใช้งานจริงต้องรัน migration ห้องค่าใช้จ่ายจากรีโพซิทอรี API กับ Supabase project ที่ตั้งใน `.env`
+
+เมื่อรันเว็บผ่าน `compose.local.yml` จากโฟลเดอร์แม่ คำสั่ง `dev:container` ใช้ Webpack ร่วมกับ `WATCHPACK_POLLING=1000` เพื่อให้การแก้ไฟล์บน Windows ส่งผลถึง Browser โดยไม่ต้อง restart container
+การรัน `bun run dev` บนเครื่องโดยตรงยังใช้ Turbopack ตามค่าเริ่มต้นของ Next.js
+
+ตัวแปร `NEXT_PUBLIC_*` ใช้ได้เฉพาะ Supabase publishable key ห้ามใส่ secret หรือ service-role key
