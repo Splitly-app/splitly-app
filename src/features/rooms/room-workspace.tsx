@@ -303,36 +303,40 @@ function ExpenseEntry({
   return (
     <tr aria-busy={busy} className="expense-row">
       <th className="matrix-expense" scope="row">
-        <span className="block font-bold">{title}</span>
-        <strong className="amount mt-1 block">
-          {formatBaht(expense.amountCents)}
-        </strong>
-        <span className="muted mt-1 block text-xs">{payer?.name} จ่าย</span>
-        <span className="muted block text-xs">
-          {formatDate(expense.createdAt)}
-        </span>
-        {editable && (
-          <div className="mt-2 flex gap-1">
-            <button
-              aria-label={`แก้ไขรายการ ${title}`}
-              className="expense-inline-action"
-              disabled={busy}
-              onClick={() => onAction("edit", expense.id)}
-              type="button"
-            >
-              แก้ไข
-            </button>
-            <button
-              aria-label={`ลบรายการ ${title}`}
-              className="expense-inline-action expense-inline-action-danger"
-              disabled={busy}
-              onClick={() => onAction("delete", expense.id)}
-              type="button"
-            >
-              ลบ
-            </button>
+        <div className="matrix-expense-content">
+          <div className="matrix-expense-text">
+            <span className="font-bold">{title}</span>
+            <strong className="amount">
+              {formatBaht(expense.amountCents)}
+            </strong>
+            <span className="muted text-xs">{payer?.name} จ่าย</span>
+            <span className="muted text-xs">
+              {formatDate(expense.createdAt)}
+            </span>
           </div>
-        )}
+          {editable && (
+            <div className="matrix-expense-actions">
+              <button
+                aria-label={`แก้ไขรายการ ${title}`}
+                className="expense-inline-action"
+                disabled={busy}
+                onClick={() => onAction("edit", expense.id)}
+                type="button"
+              >
+                แก้ไข
+              </button>
+              <button
+                aria-label={`ลบรายการ ${title}`}
+                className="expense-inline-action expense-inline-action-danger"
+                disabled={busy}
+                onClick={() => onAction("delete", expense.id)}
+                type="button"
+              >
+                ลบ
+              </button>
+            </div>
+          )}
+        </div>
         {error && (
           <span className="form-error mt-2 block font-normal" role="alert">
             {error}
@@ -478,6 +482,7 @@ export function RoomWorkspace({
 }) {
   const [shareUrl, setShareUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const [proof, setProof] = useState<{
     url: string;
     mimeType: string;
@@ -495,7 +500,10 @@ export function RoomWorkspace({
     (person) => person.id === room.viewerParticipantId,
   );
   useEffect(() => {
-    const url = new URL(location.href);
+    const url = new URL(
+      "/",
+      process.env.NEXT_PUBLIC_SHARE_ORIGIN || location.origin,
+    );
     url.hash = `/room/${token}`;
     setShareUrl(url.toString());
   }, [token]);
@@ -535,12 +543,15 @@ export function RoomWorkspace({
     }
   }
   async function copy() {
+    if (!shareUrl) return;
     try {
       await navigator.clipboard.writeText(shareUrl);
+      setCopyError(null);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
       setCopied(false);
+      setCopyError("คัดลอกลิงก์ไม่สำเร็จ กรุณาเลือกข้อความในช่องแล้วคัดลอกเอง");
     }
   }
   const activeExpense = room.expenses.find(
@@ -568,11 +579,12 @@ export function RoomWorkspace({
         </div>
         <button
           className="btn btn-outline"
+          disabled={!shareUrl}
           onClick={() => void copy()}
           type="button"
         >
           <Icon name={copied ? "check" : "share"} />
-          <span aria-live="polite">{copied ? "คัดลอกแล้ว" : "คัดลอกลิงก์"}</span>
+          <span>{copied ? "คัดลอกแล้ว" : "คัดลอกลิงก์"}</span>
         </button>
       </div>
       {recoveryCode && (
@@ -638,7 +650,10 @@ export function RoomWorkspace({
           <>
             <div className="mt-3 flex items-center justify-between gap-3">
               <p className="muted text-xs" id="matrix-help">
-                ✓ ร่วมหาร · × ไม่ร่วมหาร · — ยังไม่อยู่ในห้อง
+                <span className="matrix-help-included">✓ ร่วมหาร</span>
+                {" · "}
+                <span className="matrix-help-excluded">× ไม่ร่วมหาร</span>
+                {" · — ยังไม่อยู่ในห้อง"}
               </p>
               {matrixCanScroll && (
                 <div className="flex shrink-0 gap-1">
@@ -785,15 +800,35 @@ export function RoomWorkspace({
           <label className="field-label mt-4" htmlFor="share-url">
             ลิงก์ห้อง
           </label>
-          <input
-            autoComplete="off"
-            className="field text-sm"
-            id="share-url"
-            name="shareUrl"
-            onFocus={(e) => e.target.select()}
-            readOnly
-            value={shareUrl}
-          />
+          <div className="flex min-w-0 gap-2">
+            <input
+              autoComplete="off"
+              className="field min-w-0 flex-1 text-sm"
+              id="share-url"
+              name="shareUrl"
+              onFocus={(e) => e.target.select()}
+              readOnly
+              value={shareUrl}
+            />
+            <button
+              aria-label={copied ? "คัดลอกลิงก์ห้องแล้ว" : "คัดลอกลิงก์ห้อง"}
+              className="btn btn-outline shrink-0 !px-3"
+              disabled={!shareUrl}
+              onClick={() => void copy()}
+              type="button"
+            >
+              <Icon name={copied ? "check" : "copy"} />
+            </button>
+          </div>
+          <p
+            aria-live="polite"
+            className={
+              copyError ? "form-error mt-2 text-sm" : "muted mt-2 text-sm"
+            }
+            role={copyError ? "alert" : "status"}
+          >
+            {copyError ?? (copied ? "คัดลอกลิงก์ห้องแล้ว" : "")}
+          </p>
         </section>
       </div>
       <dialog

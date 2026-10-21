@@ -31,6 +31,7 @@ export function RoomEntryDialog({
   const [id, setId] = useState(room.participants[0]?.id ?? "");
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
+  const [pinFocused, setPinFocused] = useState(false);
   const [code, setCode] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -216,9 +217,11 @@ export function RoomEntryDialog({
               id="entry-pin"
               inputMode="numeric"
               maxLength={6}
+              onBlur={() => setPinFocused(false)}
               onChange={(event) =>
                 setPin(event.target.value.replace(/\D/g, "").slice(0, 6))
               }
+              onFocus={() => setPinFocused(true)}
               ref={pinRef}
               required
               type="password"
@@ -226,7 +229,10 @@ export function RoomEntryDialog({
             />
             <span aria-hidden="true" className="pin-slots">
               {pinSlots.map((slot, index) => (
-                <span className="pin-slot" key={slot}>
+                <span
+                  className={`pin-slot${pinFocused && index === Math.min(pin.length, 5) ? " pin-slot-active" : ""}`}
+                  key={slot}
+                >
                   {index < pin.length ? "●" : ""}
                 </span>
               ))}

@@ -1,12 +1,14 @@
 import {
   ArrowRight,
   Check,
+  Copy,
   Eye,
   Moon,
   Plus,
   Receipt,
   Share,
   Sun,
+  Trash2,
   Upload,
   Users,
   X,
@@ -19,11 +21,13 @@ const icons = {
   receipt: Receipt,
   users: Users,
   check: Check,
+  copy: Copy,
   x: X,
   eye: Eye,
   upload: Upload,
   moon: Moon,
   sun: Sun,
+  trash: Trash2,
 };
 
 type IconName = keyof typeof icons;

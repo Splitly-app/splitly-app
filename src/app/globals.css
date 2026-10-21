@@ -13,10 +13,12 @@
   --ring: #2c64bc;
   --success: #0f6b56;
   --danger: #a52f44;
-  --matrix-active: #e7f0ff;
-  --matrix-active-foreground: #0f2d5c;
-  --matrix-active-border: #b9d1f4;
+  --matrix-included: #e9f7ef;
+  --matrix-included-border: #a6d8bc;
+  --matrix-excluded: #fff0f1;
+  --matrix-excluded-border: #eab2bb;
   --matrix-hover: #f7faff;
+  --matrix-control-size: 44px;
   --matrix-name-width: 172px;
 }
 :root[data-theme="dark"] {
@@ -32,9 +34,10 @@
   --ring: #a4c8ff;
   --success: #8ce0bf;
   --danger: #ff9caa;
-  --matrix-active: #1b3453;
-  --matrix-active-foreground: #bbd7ff;
-  --matrix-active-border: #416998;
+  --matrix-included: #173127;
+  --matrix-included-border: #3e7459;
+  --matrix-excluded: #382128;
+  --matrix-excluded-border: #86505a;
   --matrix-hover: #171e29;
 }
 @media (prefers-color-scheme: dark) {
@@ -51,9 +54,10 @@
     --ring: #a4c8ff;
     --success: #8ce0bf;
     --danger: #ff9caa;
-    --matrix-active: #1b3453;
-    --matrix-active-foreground: #bbd7ff;
-    --matrix-active-border: #416998;
+    --matrix-included: #173127;
+    --matrix-included-border: #3e7459;
+    --matrix-excluded: #382128;
+    --matrix-excluded-border: #86505a;
     --matrix-hover: #171e29;
   }
 }
@@ -306,14 +310,51 @@ a {
 .expense-matrix tbody tr:hover > * {
   background: var(--matrix-hover);
 }
+.matrix-expense-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+.matrix-expense-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  line-height: 1.35;
+}
+.matrix-expense-text > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.matrix-expense-text .amount {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.matrix-expense-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+}
+@media (max-width: 639px) {
+  .matrix-expense-actions {
+    flex-direction: column;
+  }
+}
 .expense-inline-action {
-  min-height: 44px;
-  padding: 0.25rem 0.4rem;
+  display: inline-grid;
+  min-width: var(--matrix-control-size);
+  height: var(--matrix-control-size);
+  padding: 0 0.25rem;
+  place-items: center;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   color: var(--primary);
   font-size: 0.75rem;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 .expense-inline-action:hover:not(:disabled) {
   border-color: var(--primary);
@@ -340,8 +381,8 @@ a {
 }
 .matrix-toggle {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: var(--matrix-control-size);
+  height: var(--matrix-control-size);
   margin: auto;
   place-items: center;
   border: 1px solid var(--border);
@@ -350,13 +391,20 @@ a {
   color: var(--muted-foreground);
 }
 .matrix-toggle[data-included="true"] {
-  border-color: var(--matrix-active-border);
-  background: var(--matrix-active);
-  color: var(--matrix-active-foreground);
+  border-color: var(--matrix-included-border);
+  background: var(--matrix-included);
+  color: var(--success);
 }
-button.matrix-toggle {
-  width: 44px;
-  height: 44px;
+.matrix-toggle[data-included="false"] {
+  border-color: var(--matrix-excluded-border);
+  background: var(--matrix-excluded);
+  color: var(--danger);
+}
+.matrix-help-included {
+  color: var(--success);
+}
+.matrix-help-excluded {
+  color: var(--danger);
 }
 button.matrix-toggle:hover:not(:disabled) {
   border-color: var(--primary);
@@ -366,8 +414,8 @@ button.matrix-toggle:hover:not(:disabled) {
 }
 .matrix-action {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: var(--matrix-control-size);
+  height: var(--matrix-control-size);
   place-items: center;
   border: 1px solid transparent;
   border-radius: 0.625rem;
@@ -479,16 +527,15 @@ button.matrix-toggle:hover:not(:disabled) {
   overflow-wrap: anywhere;
 }
 .room-entry-name:has(input:checked) {
-  border-color: var(--primary);
+  border-color: var(--ring);
   background: var(--surface-soft);
 }
-.room-entry-name:focus-within,
-.pin-entry:focus-within {
-  outline: 2px solid var(--primary);
+.room-entry-name:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 .room-entry-name input {
-  accent-color: var(--primary);
+  accent-color: var(--ring);
 }
 .pin-entry {
   position: relative;
@@ -509,6 +556,10 @@ button.matrix-toggle:hover:not(:disabled) {
   border-radius: 0.6rem;
   background: var(--surface-soft);
   font-size: 1.25rem;
+}
+.pin-slot-active {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px var(--ring);
 }
 .pin-entry-input {
   position: absolute;
